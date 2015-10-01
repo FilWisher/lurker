@@ -18,6 +18,5 @@ main(int argc, char *argv[])
 	write(fd, msg, strlen(msg));
 	close(fd);
 	
-	printf("AOEUAOUE");
 	return 0;
 }
