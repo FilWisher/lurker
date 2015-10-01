@@ -24,8 +24,8 @@ main(int argc, char *argv[])
     if (strlen(buf) > 0) {
       write(1, buf, strlen(buf));
       write(1, "\n", 1);
+      memset(buf, '\0', MAX_BUF);
     }
-    memset(buf, '\0', MAX_BUF);
   } while (strncmp(buf, "close", MAX_BUF) != 0);
   
   unlink(fifo);
