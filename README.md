@@ -9,7 +9,7 @@ This means that we can have a backgrounded process (daemon) listening for comman
 
 By doing that, we can expose an API for the backgrounded process. And in exposing an api, we can write tiny client programs to interface with the process or link up other tiny programs in a nexus of unixy joy.
 
-An example might be to configure keybindings \([sxhkhdb](https://github.com/baskerville/sxhkd)\) to bind to a client that sends commands to the daemon.
+An example might be to configure keybindings \([sxhkd](https://github.com/baskerville/sxhkd)\) to bind to a client that sends commands to the daemon.
 
 ## separation of concerns
 The other benefit of this is that it allows us to separate the core functionality from the client interaction.
