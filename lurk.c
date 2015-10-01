@@ -17,7 +17,7 @@ main(int argc, char *argv[])
   memset(buf, '\0', 1);
   
   mkfifo(fifo, 0666);
-  
+ 
   fd = open(fifo, O_RDONLY | O_NONBLOCK, 0);
   do {
     read(fd, buf, MAX_BUF);
