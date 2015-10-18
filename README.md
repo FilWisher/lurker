@@ -1,6 +1,8 @@
 # lurker
 a short excursion into writing daemonized unix processes that can communicate with named pipes
 
+After some experimentation and research, it turns out FIFOs are good for sending messages into a process but if you want a response, you need a new FIFO. Juggling FIFOs with multiple clients is insane so onto [UNIX DOMAIN SOCKETS](https://github.com/FilWisher/ding)!
+
 ## huh?
 Some programs run as processes in the background. We need a way of communicating with these processes. We can do this by writing to and reading from named pipes. 
 

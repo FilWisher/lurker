@@ -8,11 +8,11 @@ options:
 	@echo build options:
 	@echo "CC = $(CC) $(CFLAGS)"
 
-lurk:
+lurk: lurk.c
 	@echo CC -o $@
 	@$(CC) -o $@ $@.c $(LIBS) $(CFLAGS)
 	
-prod:
+prod: prod.c
 	@echo CC -o $@
 	$(CC) -o $@ $@.c $(LIBS) $(CFLAGS)
 

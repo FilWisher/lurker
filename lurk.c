@@ -7,10 +7,11 @@
 #include <stdlib.h>
 
 #define MAX_BUF 1024
-#define LURK_FIFO "/tmp/lurk"
+#define DATA_FIFO "/tmp/lurk_data"
+#define COMMAND_FIFO "/tmp/lurk_commands"
 
 /* fork from parent */
-pid_t
+void
 daemonize(void)
 {
   pid_t pid, sid;
@@ -43,7 +44,6 @@ daemonize(void)
   close(STDIN_FILENO);
   close(STDERR_FILENO);
   //close(STDOUT_FILENO);
-  return pid;
 }
 
 int
@@ -51,23 +51,24 @@ main(int argc, char *argv[])
 {
   int fd;
   char *fifo = LURK_FIFO;
-  char buf[MAX_BUF];
+  char command[MAX_BUF];
+  char response[MAX_BUF] = "HELLO, IS IT ME YOU'RE LOOKING FOR?";
   
-  memset(buf, '\0', 1);
+  memset(command, '\0', 1);
   
   mkfifo(fifo, 0666);
   fd = open(fifo, O_RDONLY | O_NONBLOCK, 0);
   
-  daemonize();
+//  daemonize();
   
   do {
-    read(fd, buf, MAX_BUF);
-    if (strlen(buf) > 0) {
-      write(1, buf, strlen(buf));
+    read(fd, command, MAX_BUF);
+    if (strlen(command) > 0) {
+      write(1, response, strlen(response));
       write(1, "\n", 1);
-      memset(buf, '\0', MAX_BUF);
+      memset(command, '\0', MAX_BUF);
     }
-  } while (strncmp(buf, "close", MAX_BUF) != 0);
+  } while (strncmp(command, "close", MAX_BUF) != 0);
   
   unlink(fifo);
   close(fd);
