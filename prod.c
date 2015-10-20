@@ -31,6 +31,7 @@ int
 read_response(int fd)
 {
   char response[MAX_BUF];
+  memset(response, '\0', MAX_BUF);
   read(fd, response, MAX_BUF);
   write(1, response, MAX_BUF);
 }
@@ -42,7 +43,9 @@ main(int argc, char *argv[])
   int fd_data, fd_commands;
   char *msg = argv[1];
 
-	fd_data = open_fifo(DATA_FIFO);
+  mkfifo(DATA_FIFO, 0666);
+  fd_data = open(DATA_FIFO, O_RDONLY, 0);
+	//fd_data = open_fifo(DATA_FIFO);
   fd_commands = open_fifo(COMMAND_FIFO);
  
   if (send_command(fd_commands, msg) == -1 ) {

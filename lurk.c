@@ -50,7 +50,7 @@ int
 main(int argc, char *argv[])
 {
   int fd;
-  char *fifo = LURK_FIFO;
+  char *fifo = COMMAND_FIFO;
   char command[MAX_BUF];
   char response[MAX_BUF] = "HELLO, IS IT ME YOU'RE LOOKING FOR?";
   
