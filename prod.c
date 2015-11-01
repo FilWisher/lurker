@@ -7,58 +7,71 @@
 #include <stdlib.h>
 
 #define MAX_BUF 1024
-#define DATA_FIFO "/tmp/lurk_data"
-#define COMMAND_FIFO "/tmp/lurk_commands"
+#define IN_PIPE "/tmp/lurk_data"
+#define OUT_PIPE "/tmp/lurk_commands"
 
 int
-open_fifo(const char *name)
+open_for_reading(char *name)
 {
-  int fd;
-  mkfifo(name, 0666);
-  fd = open(name, O_RDONLY | O_NONBLOCK, 0);
-  return fd;
+  return open(name, O_RDONLY | O_NONBLOCK, 0);
 }
 
 int
-send_command(int fd, const char *msg)
+open_for_writing(char *name)
 {
-  write(fd, msg, strlen(msg));
-  return 1;
+  return open(name, O_WRONLY, 0);
 }
 
 /* TODO: check errors, keep (while) reading response and writing to stdout */
 int
-read_response(int fd)
+read_response(int in_pipe, char *response)
 {
-  char response[MAX_BUF];
-  memset(response, '\0', MAX_BUF);
-  read(fd, response, MAX_BUF);
-  write(1, response, MAX_BUF);
+  char buf[1024];
+  int success;
+  while ((success = read(in_pipe, buf, 1024)) > 0) {
+    strncat(response, buf, strlen(buf)); 
+  }
+  if (success == -1) {
+    return -1; 
+  }
+  return 1;
+}
+
+int
+send_command(int out_pipe, char *command)
+{
+  return write(out_pipe, command, strlen(command));
 }
 
 /* TODO: check argv[1] was actually received */
 int
 main(int argc, char *argv[])
 {
-  int fd_data, fd_commands;
-  char *msg = argv[1];
 
-  mkfifo(DATA_FIFO, 0666);
-  fd_data = open(DATA_FIFO, O_RDONLY, 0);
-	//fd_data = open_fifo(DATA_FIFO);
-  fd_commands = open_fifo(COMMAND_FIFO);
+  char *response;
+  int in_pipe, out_pipe, received = 0;
+  
+  mkfifo(IN_PIPE, 0666);
+  mkfifo(OUT_PIPE, 0666);
+  in_pipe = open_for_reading(IN_PIPE); 
+  out_pipe = open_for_reading(OUT_PIPE); 
  
-  if (send_command(fd_commands, msg) == -1 ) {
-    perror("send_command"); 
-    exit(1);
+  /* hceck read_response error better, this isn't right */
+  send_command(out_pipe, argv[1]);
+  while (!received) {
+    int x;
+    if ((x = read_response(in_pipe, response)) <= 0) {
+      received = 1;
+      printf("received response");
+      break;
+    }
+    printf("AOEU: %d\n", x);
   }
-  if (read_response(fd_data) == -1) {
-    perror("read_response");
-    exit(1);
-  }
- 
-	close(fd_data);
-	close(fd_commands);
+
+  unlink(IN_PIPE);
+  unlink(OUT_PIPE);
+	close(in_pipe);
+	close(in_pipe);
 	
 	return 0;
 }

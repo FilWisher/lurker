@@ -7,8 +7,8 @@
 #include <stdlib.h>
 
 #define MAX_BUF 1024
-#define DATA_FIFO "/tmp/lurk_data"
-#define COMMAND_FIFO "/tmp/lurk_commands"
+#define OUT_PIPE "/tmp/lurk_data"
+#define IN_PIPE "/tmp/lurk_commands"
 
 /* fork from parent */
 void
@@ -47,30 +47,62 @@ daemonize(void)
 }
 
 int
+open_for_reading(char *name)
+{
+  return open(name, O_RDONLY | O_NONBLOCK, 0);
+}
+
+int
+open_for_writing(char *name)
+{
+  return open(name, O_WRONLY, 0);
+}
+
+int
+read_command(int in_pipe, char *command)
+{
+  return read(in_pipe, command, 1024);
+}
+
+int
+run_command(char *command, char *response)
+{
+  strncpy(response, "hello", 6);
+  return 1;
+}
+
+int
+send_response(int out_pipe, char *response)
+{
+  return write(out_pipe, response, 1024);
+}
+
+int
 main(int argc, char *argv[])
 {
-  int fd;
-  char *fifo = COMMAND_FIFO;
-  char command[MAX_BUF];
-  char response[MAX_BUF] = "HELLO, IS IT ME YOU'RE LOOKING FOR?";
+  char *command, *response;
+  int success, in_pipe, out_pipe;
   
-  memset(command, '\0', 1);
+  mkfifo(IN_PIPE, 0666);
+  mkfifo(OUT_PIPE, 0666);
+  in_pipe = open_for_reading(IN_PIPE); 
+  out_pipe = open_for_reading(OUT_PIPE); 
   
-  mkfifo(fifo, 0666);
-  fd = open(fifo, O_RDONLY | O_NONBLOCK, 0);
-  
+  for(;;) {
+    success = read_command(in_pipe, command);
+    if (success) {
+      run_command(command, response);
+      send_response(out_pipe, response);
+      printf("AOEUAOU\n");
+      success = 0;
+    }
+  }
+
 //  daemonize();
   
-  do {
-    read(fd, command, MAX_BUF);
-    if (strlen(command) > 0) {
-      write(1, response, strlen(response));
-      write(1, "\n", 1);
-      memset(command, '\0', MAX_BUF);
-    }
-  } while (strncmp(command, "close", MAX_BUF) != 0);
-  
-  unlink(fifo);
-  close(fd);
+  unlink(IN_PIPE);
+  unlink(OUT_PIPE);
+  close(in_pipe);
+  close(out_pipe);
   return 0;
 }
