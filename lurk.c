@@ -49,25 +49,33 @@ daemonize(void)
 int
 open_for_reading(char *name)
 {
-  return open(name, O_RDONLY | O_NONBLOCK, 0);
+  return open(name, O_RDONLY | O_NONBLOCK);
 }
 
 int
 open_for_writing(char *name)
 {
-  return open(name, O_WRONLY, 0);
+  return open(name, O_WRONLY);
 }
 
 int
 read_command(int in_pipe, char *command)
 {
-  return read(in_pipe, command, 1024);
+  memset(command, '\0', 1024);
+  if (read(in_pipe, command, 1024) <= 0) {
+    return 0; 
+  } else {
+    return 1; 
+  }
 }
 
 int
 run_command(char *command, char *response)
 {
-  strncpy(response, "hello", 6);
+  char *thanks = "thanks for saying: ";
+  memset(response, '\0', 1024);
+  strncpy(response, thanks, strlen(thanks));
+  strncat(response, command, strlen(command));
   return 1;
 }
 
@@ -80,20 +88,22 @@ send_response(int out_pipe, char *response)
 int
 main(int argc, char *argv[])
 {
-  char *command, *response;
+  char command[1024], response[1024];
+  memset(command, '\0', 1024);
   int success, in_pipe, out_pipe;
   
   mkfifo(IN_PIPE, 0666);
   mkfifo(OUT_PIPE, 0666);
   in_pipe = open_for_reading(IN_PIPE); 
-  out_pipe = open_for_reading(OUT_PIPE); 
-  
-  for(;;) {
+  out_pipe = open_for_writing(OUT_PIPE); 
+  int i = 0; 
+  while (1) {
     success = read_command(in_pipe, command);
     if (success) {
       run_command(command, response);
       send_response(out_pipe, response);
-      printf("AOEUAOU\n");
+      printf("command: %s\n", command);
+      printf("response: %s\n", response);
       success = 0;
     }
   }

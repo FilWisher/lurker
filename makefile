@@ -1,6 +1,6 @@
 CC = gcc
 LIBS = -L/usr/lib -lc
-CFLAGS = -std=c99 -pedantic
+CFLAGS = -std=c99 -pedantic -g
 
 all: options lurk prod
 
