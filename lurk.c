@@ -108,7 +108,6 @@ main(int argc, char *argv[])
     }
   }
 
-//  daemonize();
   
   unlink(IN_PIPE);
   unlink(OUT_PIPE);
